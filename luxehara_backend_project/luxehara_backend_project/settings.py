@@ -113,6 +113,9 @@ CSRF_COOKIE_SECURE = False  # Set to True in production (requires HTTPS)
 SESSION_COOKIE_SECURE = False  # Set to True in production
 CSRF_COOKIE_HTTPONLY = True
 
+SESSION_COOKIE_SAMESITE = "Lax"   # 👈 IMPORTANT
+SESSION_COOKIE_HTTPONLY = True
+
 
 ROOT_URLCONF = 'luxehara_backend_project.urls'
 

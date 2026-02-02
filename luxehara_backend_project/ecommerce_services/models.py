@@ -1,8 +1,9 @@
 from django.db import models
 import uuid
+from django.core.exceptions import ValidationError
+
 
 # Create your models here.
-
 class categories(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     category_name = models.CharField(max_length=30, blank=False, null=False)
@@ -47,7 +48,20 @@ class product_inventory(models.Model):
     color = models.ForeignKey(colors_available, on_delete=models.CASCADE)
     size = models.ForeignKey(size_details, on_delete=models.CASCADE)
 
+    # ✅ PRICING (ADD HERE)
+    cost_price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    selling_price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    max_price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+
     available_quantity = models.IntegerField(default=0)
+
+
+    def clean(self):
+        if self.selling_price < self.cost_price:
+            raise ValidationError("Selling price cannot be less than cost price")
+
+        if self.max_price < self.selling_price:
+            raise ValidationError("Max price cannot be less than selling price")
 
     class Meta:
         unique_together = ("product", "color", "size")
@@ -59,8 +73,15 @@ class product_inventory(models.Model):
 
 class product_images(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    product_fk = models.ForeignKey(product, on_delete=models.CASCADE, related_name="products_image_relation")
+
+    product_fk = models.ForeignKey(
+        product,
+        on_delete=models.CASCADE,
+        related_name="products_image_relation"
+    )
+
+    image_url = models.URLField(max_length=1000,null=True,blank=True)
     is_primary = models.BooleanField(default=False)
 
     def __str__(self):
-        return self.product_fk
+        return str(self.product_fk)
